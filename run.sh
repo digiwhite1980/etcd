@@ -27,13 +27,23 @@ function binCheck {
 	done
 }
 
-binCheck git
+binCheck git terraform
 
 [[ ! -x $(basename ${0}) ]] 	&& log 3 "Please execute $(basename ${0}) from local directory (./run.sh)"
 [[ ! -d "init" ]] 				&& log 3 "./init folder not found."
-[[ ! -d "./terraform" ]] 		&& git submodule init
+
+git submodule init
+[[ $? -ne 0 ]] && log 3 "Failed to initialize submodules"
+
+git submodule update
+[[ $? -ne 0 ]] && log 3 "Failed to update submodules"
 
 cd init
+
 terraform init
-terraform plan -state .terraform_state
+[[ $? -ne 0 ]] && log 3 "Failed to initialize terraform"
+
+terraform plan -state .terraform_state > /dev/null 2>&1
+[[ $? -ne 0 ]] && log 3 "Failed to plan terraform"
+
 terraform apply -state .terraform_state

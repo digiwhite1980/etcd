@@ -248,7 +248,7 @@ data "template_file" "instance-worker" {
   }
 }
 
-module "instance_worker" {
+module "instance_etcd" {
   source                  = "../terraform/instance"
 
   availability_zone       = "${element(data.aws_availability_zones.site_avz.names, 0)}"
@@ -259,7 +259,7 @@ module "instance_worker" {
     etcd                  = true
   }
 
-  instance_name           = "worker-"
+  instance_name           = "etcd"
   environment             = "${module.site.environment}"
   aws_subnet_id           = "${element(module.subnet_public.id, 0)}"
 
@@ -286,15 +286,15 @@ module "instance_worker" {
 }
 
 output "worker_public_ip" {
-  value = "${module.instance_worker.public_ip}"
+  value = "${module.instance_etcd.public_ip}"
 }
 
 output "worker_private_ip" {
-  value = "${module.instance_worker.private_ip}"
+  value = "${module.instance_etcd.private_ip}"
 }
 
 output "worker_public_dns" {
-  value = "${module.instance_worker.public_dns}"
+  value = "${module.instance_etcd.public_dns}"
 }
 
 # #####################################################################################
@@ -316,7 +316,7 @@ output "worker_public_dns" {
 #   security_group_ids      = [ "${module.sg_ingress_etcd.id}" ,
 #                               "${module.sg_egress.id}"]
 
-#   instances               = [ "${module.instance_worker.id}" ]
+#   instances               = [ "${module.instance_etcd.id}" ]
 
 #   listener = [
 #     {
@@ -349,4 +349,3 @@ output "worker_public_dns" {
 # }
 
 # #####################################################################################
-
