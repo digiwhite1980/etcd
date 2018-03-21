@@ -1,5 +1,5 @@
 # ETCD container based on AWS flags
-This docker images uses AWS tags to automatically deploy a multimaster ETCD cluster. It used the generic ETCD_ variables to provision the ETCD cluster.
+This docker images uses AWS tags to automatically deploy a multimaster ETCD cluster. It uses the generic ETCD_ variables to provision the ETCD cluster.
 In order to do so, the image uses the internal docker.socket from the guest operating system to initiate the default configured anigeo/awscli image.
 All EC2 instances are equipped with the correct machine role (see example terraform scripts) in order to obtain the EC2 tags through the AWS cli.
 
@@ -14,7 +14,7 @@ Cleaning takes place only when restarting the ETCD service or bootstrapping new 
 * execute ./run.sh in order to start deploying the ETCD cluster on AWS
 
 ## ETCD variables
-As stated the image used variables in order determin the working environment. Currently the following environment variables have default values
+As stated the image uses variables in order determine the working environment. Currently the following environment variables have default values
 set which can be overridden.
 ```
 ##############################################################################
@@ -45,10 +45,10 @@ The provides Terraform scripts are based on the latest Ubuntu image. This howeve
 the examples so you the cloud-init mechanism in order to provision the ETCD systemd service. CoreOS will be a good replacement is wanted.
 
 ## SSL / TLS
-In the Terraform sample scripts, SSL certificates can be rendered and directly injected through cloud-init scripts. Please keer in mind that when using
+In the Terraform sample scripts, SSL certificates can be rendered and directly injected through cloud-init scripts. Please keep in mind that when using
 a custom CA, all SSL certificates need to have the corresponding endpoint IP within the Certificate Subject Names. In our Terraform examples we 
 dynamically provision ETCD members. In this case the private IP address is not fixed. If you want to use fixed addresses you need to create a map 
-within Terraform and connect the index counter to the prrivate IP address entry within the Terraform module "instance".
+within Terraform and connect the index counter to the private IP address entry within the Terraform module "instance".
 
 In the following example the export of the client certificate is shown. The entrypoint script will look for these certificates in the ${ED_SSL} folder
 which is set in the Dockerfile. When using the docker -v option, which is used in the example, the SSL certificates are directly made available for ETCD.
