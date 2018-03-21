@@ -1,0 +1,5 @@
+terraform/
+init/aws_credentials.tf
+init/.terraform
+init/.terraform_state
+private/
