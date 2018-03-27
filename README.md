@@ -11,6 +11,7 @@ Cleaning takes place only when restarting the ETCD service or bootstrapping new 
 ## Before you start
 * Make sure you add your AWS public and private SSH key in the private folder
 * cp init/aws_credentials.tf.example to init/aws_credentials.tf and alter the file with the correct settings
+* If you are in a region different then eu-west-1 please alter init/variables.tf :: subnet_private / subnet_public to meet your region and subnet count
 * Take a look at init/init.tf :: module "instance_etcd". Here the variable count is set to 2. Change this to play with your ETCD cluster.
 * execute ./run.sh in order to start deploying the ETCD cluster on AWS
 

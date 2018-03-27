@@ -10,6 +10,10 @@ variable "project" {
   default            = "etcd"
 }
 
+variable "ssl_arn" {
+  default            = ""
+}
+
 variable "vpc_cidr" {
   default            = {
     dev              = "10.11.0.0/16"

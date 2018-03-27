@@ -238,8 +238,10 @@ module "iam_instance_profile" {
   role                = "${module.role_iam.id}"
 }
 
-data "template_file" "instance-worker" {
-  template              = "${file("templates/worker-cloud-config.tpl")}"
+# #####################################################################################
+
+data "template_file" "instance-etcd" {
+  template              = "${file("templates/etcd-cloud-config.tpl")}"
 
   vars {
     ssl_client_cert       = "${module.ssl_cert_etcd.cert_pem}"
@@ -282,70 +284,74 @@ module "instance_etcd" {
   aws_instance_type       = "t2.micro"
   associate_public_ip_address = true
 
-  user_data               = "${data.template_file.instance-worker.rendered}"
+  user_data               = "${data.template_file.instance-etcd.rendered}"
 }
 
-output "worker_public_ip" {
+output "etcd_public_ip" {
   value = "${module.instance_etcd.public_ip}"
 }
 
-output "worker_private_ip" {
+output "etcd_private_ip" {
   value = "${module.instance_etcd.private_ip}"
 }
 
-output "worker_public_dns" {
+output "etcd_public_dns" {
   value = "${module.instance_etcd.public_dns}"
 }
 
 # #####################################################################################
 
-# module "elb_etcd" {
-#   source                  = "../terraform/elb_map"
-#   project                 = "${module.site.project}"
-#   environment             = "${module.site.environment}"
+module "elb_etcd" {
+  source                  = "../terraform/elb_map"
+  project                 = "${module.site.project}"
+  environment             = "${module.site.environment}"
 
-#   name                    = "ELB-etcd"
+  name                    = "ELB-etcd"
 
-#   tags = {
-#     Name                  = "ELB-etcd"
-#   }
+  tags = {
+    Name                  = "ELB-etcd"
+  }
 
-#   internal                = true
+  internal                = true
 
-#   subnet_ids              = [ "${module.subnet_public.id}" ]
-#   security_group_ids      = [ "${module.sg_ingress_etcd.id}" ,
-#                               "${module.sg_egress.id}"]
+  subnet_ids              = [ "${module.subnet_public.id}" ]
+  security_group_ids      = [ "${module.sg_ingress_etcd.id}" ,
+                              "${module.sg_egress.id}"]
 
-#   instances               = [ "${module.instance_etcd.id}" ]
+  instances               = [ "${module.instance_etcd.id}" ]
 
-#   listener = [
-#     {
-#       instance_port       = "2379"
-#       instance_protocol   = "HTTP"
-#       lb_port             = "2379"
-#       lb_protocol         = "HTTP"
-#     },
-#     {
-#       instance_port       = "2380"
-#       instance_protocol   = "HTTP"
-#       lb_port             = "2380"
-#       lb_protocol         = "HTTP"
-#     }
-#   ]
+  listener = [
+    {
+      instance_port       = "2379"
+      instance_protocol   = "TCP"
+      lb_port             = "2379"
+      #lb_protocol         = "HTTP"
+      lb_protocol         = "TCP"
+      #ssl_certificate_id  = "${var.ssl_arn}"
+    },
+    {
+      instance_port       = "2380"
+      instance_protocol   = "TCP"
+      lb_port             = "2380"
+      #lb_protocol         = "HTTP"
+      lb_protocol         = "TCP"
+      #ssl_certificate_id  = "${var.ssl_arn}"
+    }
+  ]
 
-#   health_check = [
-#     { 
-#       healthy_threshold   = 2
-#       unhealthy_threshold = 2
-#       timeout             = 3
-#       target              = "HTTP:2379/health"
-#       interval            = 15
-#     }
-#   ]
-# }
+  health_check = [
+    { 
+      healthy_threshold   = 2
+      unhealthy_threshold = 2
+      timeout             = 3
+      target              = "TCP:2379"
+      interval            = 15
+    }
+  ]
+}
 
-# output "elb-etcd" {
-#   value = "${module.elb_etcd.dns_name}"
-# }
+output "elb-etcd" {
+  value = "${module.elb_etcd.dns_name}"
+}
 
 # #####################################################################################
