@@ -187,7 +187,7 @@ done
 consoleOutput 1 "Stage [2]: retreive corresponding IP adres for instances"
 for INSTANCE in $(${DOCKER_AWS_CMD} ${DOCKER_TAG_OPT} ${DOCKER_TAG_FTR} | jq -r '.Tags[] | "\(.ResourceId)"')
 do
-	INSTANCE_IH=$(${DOCKER_AWS_CMD} ${DOCKER_EC2_OPT} --instance=${INSTANCE} | '.Reservations[].Instances[] | "\(.PrivateIpAddress):\(.PrivateDnsName)"')
+	INSTANCE_IH=$(${DOCKER_AWS_CMD} ${DOCKER_EC2_OPT} --instance=${INSTANCE} | jq -r '.Reservations[].Instances[] | "\(.PrivateIpAddress):\(.PrivateDnsName)"')
 	INSTANCE_IP=$(echo ${INSTANCE_IH} | awk -F: '{print $1}') 
 	INSTANCE_HN=$(echo ${INSTANCE_IH} | awk -F: '{print $2}') 
 
