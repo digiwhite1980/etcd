@@ -117,6 +117,17 @@ if [ -f "${ED_SSL}/${CLIENT_TRUSTED_CA_FILE}" ]; then
 	export CURL_OPT_CLIENT="${CURL_OPT_CLIENT} --cacert ${ED_SSL}/${CLIENT_TRUSTED_CA_FILE}"
 fi
 
+if [ -f ${ED_SSL}/${CLIENT_TRUSTED_CA_FILE} ]; then
+	cp ${ED_SSL}/${CLIENT_TRUSTED_CA_FILE} /etc/ssl/certs
+	consoleOutput 1 "Stage [0]: Setting ca-certifcates ${CLIENT_TRUSTED_CA_FILE} with update-ca-certificates"
+	update-ca-certificates > /dev/null 2>&1
+fi
+
+if [ -f ${ED_SSL}/${PEER_TRUSTED_CA_FILE} ]; then
+	cp ${ED_SSL}/${PEER_TRUSTED_CA_FILE} /etc/ssl/certs
+	consoleOutput 1 "Stage [0]: Setting ca-certifcates ${peer_TRUSTED_CA_FILE} with update-ca-certificates"
+	update-ca-certificates > /dev/null 2>&1
+fi
 ### ---------------------------------------------------------------------- ###
 
 export PEER_TRUSTED_CA_FILE=${PEER_TRUSTED_CA_FILE:-peer_ca.crt}
