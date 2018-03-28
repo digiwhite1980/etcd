@@ -316,10 +316,15 @@ fi
 if [ "${INSTANCE_OWN_FOUND}" != "1" -a ${CLUSTER_EXISTS} -ne 0 ]; then
 	((INSTANCE_COUNT=INSTANCE_COUNT+1))
 	consoleOutput 1 "[6]: We are a new members. Adding to cluster."
+
+	[[ ${ETCD_MEMBER_TYPE} == "host" ]] \
+		&& MEMBER_ADD_ADDRESS=${INSTANCE_OWN_HN} \
+		|| MEMBER_ADD_ADDRESS=${INSTANCE_OWN_IP}
+
 	HTTP_CODE=$(curl ${CURL_OPT} ${CURL_OPT_CLIENT} -s -o /dev/null -w "%{http_code}" ${CLNT_SCHEMA}://${LAST_HEALTHY_IP}:${CLNT_PORT}/v2/members \
 		-X POST \
 		-H 'Content-Type: application/json' \
-		-d '{"peerURLs":["'${PEER_SCHEMA}'://'${INSTANCE_OWN_IP}':'${PEER_PORT}'"]}')
+		-d '{"peerURLs":["'${PEER_SCHEMA}'://'${MEMBER_ADD_ADDRESS}':'${PEER_PORT}'"]}')
 
 	[[ "${HTTP_CODE}" != "${ETCD_MEMBER_ADD_OK}" ]] \
 		&& consoleOutput 3 "[6]: - Instance ${INSTANCE_OWN_IP} State = Failed to add to cluster [http_code: ${HTTP_CODE}]. [Aborting]" \
