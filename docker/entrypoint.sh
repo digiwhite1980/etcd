@@ -43,9 +43,20 @@ fi
 
 checkBin curl docker ${ED_HOME}/bin/etcd
 
+##############################################################################
+# Here we define the way we add nodes: based on host or IP. When using SSL
+# please use host.
+##############################################################################
+export ETCD_MEMBER_TYPE=${ETCD_MEMBER_TYPE:-host}
+
 INSTANCE_OWN_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 INSTANCE_OWN_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+INSTANCE_OWN_HN=$(curl -s http://169.254.169.254/latest/meta-data/local-hostname)
 INSTANCE_COUNT=0
+
+[[ ${ETCD_MEMBER_TYPE} == "host" ]] \
+	&& export INSTANCE_OWN_IP=${INSTANCE_OWN_HN}
+
 ###############################################################################
 
 #if [ "${ELB_ENDPOINT}" == "" ]; then
@@ -173,16 +184,21 @@ done
 consoleOutput 1 "Stage [2]: retreive corresponding IP adres for instances"
 for INSTANCE in $(${DOCKER_AWS_CMD} ${DOCKER_TAG_OPT} ${DOCKER_TAG_FTR} | jq -r '.Tags[] | "\(.ResourceId)"')
 do
-	INSTANCE_IP=$(${DOCKER_AWS_CMD} ${DOCKER_EC2_OPT} --instance=${INSTANCE} | jq -r .Reservations[].Instances[].PrivateIpAddress)
+	INSTANCE_IH=$(${DOCKER_AWS_CMD} ${DOCKER_EC2_OPT} --instance=${INSTANCE} | '.Reservations[].Instances[] | "\(.PrivateIpAddress):\(.PrivateDnsName)"')
+	INSTANCE_IP=$(echo ${INSTANCE_IH} | awk -F: '{print $1}') 
+	INSTANCE_HN=$(echo ${INSTANCE_IH} | awk -F: '{print $2}') 
 
 	if [[ ! "${INSTANCE_IP}"  =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
 		consoleOutput 1 "[2]: - instance ${INSTANCE} State = has null address. [Instance probably terminated]"
 		continue
 	fi
 
-	INSTANCE_DATA[${INSTANCE_COUNT}]=${INSTANCE}:${INSTANCE_IP}
+	[[ "${ETCD_MEMBER_TYPE}" == "host" ]] \
+		&& INSTANCE_DATA[${INSTANCE_COUNT}]=${INSTANCE}:${INSTANCE_HN} \
+		|| INSTANCE_DATA[${INSTANCE_COUNT}]=${INSTANCE}:${INSTANCE_IP}
+
 	((INSTANCE_COUNT=INSTANCE_COUNT+1))
-	consoleOutput 1 "[2]: * Instance ${INSTANCE}[${INSTANCE_COUNT}] [ip: ${INSTANCE_IP}]"
+	consoleOutput 1 "[2]: * Instance ${INSTANCE}[${INSTANCE_COUNT}] [ip: ${INSTANCE_IP}, dns: ${INSTANCE_HN}]"
 done
 
 #################################################################################
@@ -204,7 +220,7 @@ do
 
 	HEALTH=$(curl ${CURL_OPT} ${CURL_OPT_CLIENT} -m 3 -s ${CLNT_SCHEMA}://${INSTANCE_IP}:${CLNT_PORT}/health | jq -r .health)
 	if [ "${HEALTH}" == "true" ]; then
-		consoleOutput 1 "[3]: * Instance ${INSTANCE_ID} State = Healty [ip: ${INSTANCE_IP}, schema: ${CLNT_SCHEMA}]"
+		consoleOutput 1 "[3]: * Instance ${INSTANCE_ID} State = Healty [ip/hn: ${INSTANCE_IP}, schema: ${CLNT_SCHEMA}]"
 		CLUSTER_EXISTS=1
 		LAST_HEALTHY_IP=${INSTANCE_IP}
 
@@ -212,7 +228,7 @@ do
 			&& TMP_ETCD_INITIAL_CLUSTER="${INSTANCE_ID}=${PEER_SCHEMA}://${INSTANCE_IP}:${PEER_PORT}" \
 			|| TMP_ETCD_INITIAL_CLUSTER+=",${INSTANCE_ID}=${PEER_SCHEMA}://${INSTANCE_IP}:${PEER_PORT}"
 	else
-		consoleOutput 1 "[3]: - Instance ${INSTANCE_ID} State = Unhealthy [ip: ${INSTANCE_IP}, schema: ${CLNT_SCHEMA}]"
+		consoleOutput 1 "[3]: - Instance ${INSTANCE_ID} State = Unhealthy [ip/hn: ${INSTANCE_IP}, schema: ${CLNT_SCHEMA}]"
 	fi
 done
 
