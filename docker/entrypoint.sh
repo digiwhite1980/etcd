@@ -226,6 +226,7 @@ done
 
 consoleOutput 1 "Stage [3]: Check for health in case ETCD cluster exists"
 CLUSTER_EXISTS=0
+
 for INSTANCE in ${INSTANCE_DATA[@]}
 do
 	INSTANCE_ID=$(echo ${INSTANCE} | awk -F: '{print $1}')
