@@ -106,8 +106,10 @@ export CLIENT_CERT_FILE=${CLIENT_CERT_FILE:-client.crt}
 export CLIENT_KEY_FILE=${CLIENT_KEY_FILE:-client.key}
 
 if [ -f ${ED_SSL}/${CLIENT_CERT_FILE} -a -f ${ED_SSL}/${CLIENT_KEY_FILE} -a "${ETCD_AUTO_TLS}" == "" ]; then
+	consoleOutput 1 "Stage [0]: Found ${CLIENT_CERT_FILE} and ${CLIENT_KEY_FILE}. Setting SSL/TLS for client communication."
 	export ETCD_CERT_FILE=${ED_SSL}/${CLIENT_CERT_FILE}
 	export ETCD_KEY_FILE=${ED_SSL}/${CLIENT_KEY_FILE}
+	export ETCD_CLIENT_CERT_AUTH=1
 	export CLNT_SCHEMA=https
 	export CURL_OPT_CLIENT="--cert ${ED_SSL}/${CLIENT_CERT_FILE} --key ${ED_SSL}/${CLIENT_KEY_FILE}"
 fi
@@ -135,8 +137,10 @@ export PEER_CERT_FILE=${PEER_CERT_FILE:-peer.crt}
 export PEER_KEY_FILE=${PEER_KEY_FILE:-peer.key}
 
 if [ -f ${ED_SSL}/${PEER_CERT_FILE} -a -f ${ED_SSL}/${PEER_KEY_FILE} -a "${ETCD_PEER_AUTO_TLS}" == "" ]; then
+	consoleOutput 1 "Stage [0]: Found ${PEER_CERT_FILE} and ${PEER_KEY_FILE}. Setting SSL/TLS for peer communication."
 	export ETCD_PEER_CERT_FILE=${ED_SSL}/${PEER_CERT_FILE}
 	export ETCD_PEER_KEY_FILE=${ED_SSL}/${PEER_KEY_FILE}
+	export PEER_CLIENT_CERT_AUTH=1
 	export PEER_SCHEMA=https
 	export CURL_OPT_PEER="--cert ${ED_SSL}/${PEER_CERT_FILE} --key ${ED_SSL}/${PEER_KEY_FILE}"
 fi
@@ -156,7 +160,7 @@ fi
 
 export ETCD_DATA_DIR=${ETCD_DATA_DIR:-$ED_DATA}
 export ETCD_WAL_DIR=${ETCD_WAL_DIR:-$ED_WAL}
-export ETCD_LISTEN_CLIENT_URLS=${ETCD_LISTEN_CLIENT_URLS:-${CLNT_SCHEMA}://${INSTANCE_OWN_IP}:${CLNT_PORT}},http://127.0.0.1:${CLNT_PORT}
+export ETCD_LISTEN_CLIENT_URLS=${ETCD_LISTEN_CLIENT_URLS:-${CLNT_SCHEMA}://${INSTANCE_OWN_IP}:${CLNT_PORT}},${CLNT_SCHEMA}://127.0.0.1:${CLNT_PORT}
 export ETCD_LISTEN_PEER_URLS=${ETCD_LISTEN_PEER_URLS:-${PEER_SCHEMA}://${INSTANCE_OWN_IP}:${PEER_PORT}}
 export ETCD_NAME=${ETCD_NAME:-${INSTANCE_OWN_ID}}
 
