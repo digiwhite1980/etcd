@@ -342,10 +342,10 @@ if [ "${INSTANCE_OWN_FOUND}" != "1" -a ${CLUSTER_EXISTS} -ne 0 ]; then
 		-d '{"peerURLs":["'${PEER_SCHEMA}'://'${MEMBER_ADD_ADDRESS}':'${PEER_PORT}'"]}')
 
 	[[ "${HTTP_CODE}" != "${ETCD_MEMBER_ADD_OK}" ]] \
-		&& consoleOutput 3 "[6]: - Instance ${INSTANCE_OWN_IP} State = Failed to add to cluster [http_code: ${HTTP_CODE}]. [Aborting]" \
-		|| consoleOutput 1 "[6]: * Instance ${INSTANCE_OWN_IP} State = Added to cluster"
+		&& consoleOutput 3 "[6]: - Instance ${MEMBER_ADD_ADDRESS} State = Failed to add to cluster [http_code: ${HTTP_CODE}]. [Aborting]" \
+		|| consoleOutput 1 "[6]: * Instance ${MEMBER_ADD_ADDRESS} State = Added to cluster"
 
-	ETCD_INITIAL_CLUSTER+=",${INSTANCE_OWN_ID}=${PEER_SCHEMA}://${INSTANCE_OWN_IP}:${PEER_PORT}"
+	ETCD_INITIAL_CLUSTER+=",${INSTANCE_OWN_ID}=${PEER_SCHEMA}://${MEMBER_ADD_ADDRESS}:${PEER_PORT}"
 fi
 
 export ETCD_INITIAL_CLUSTER
