@@ -41,7 +41,7 @@ else
 	consoleOutput 2 "${TZ} not found. Setting time to UTC"
 fi
 
-checkBin curl docker ${ED_HOME}/bin/etcd
+checkBin curl docker /bin/etcd
 
 ##############################################################################
 # Here we define the way we add nodes: based on host or IP. When using SSL

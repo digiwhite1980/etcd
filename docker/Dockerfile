@@ -24,7 +24,7 @@ RUN apk --update add ca-certificates openssl tar tzdata bash jq curl docker && \
 RUN wget ${ED_URL} && \
     tar zxf etcd-* && \
 	 rm *.tar.gz && \
-	 mv etcd-*/* ${ED_HOME}/bin
+	 mv etcd-*/* /bin
 
 ADD entrypoint.sh /entrypoint.sh
 
