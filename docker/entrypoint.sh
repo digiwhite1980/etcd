@@ -351,5 +351,5 @@ fi
 
 export ETCD_INITIAL_CLUSTER
 
-consoleOutput 1 "[100]: Starting ${ED_HOME}/bin/etcd ${ETCD_OPTS}"
-${ED_HOME}/bin/etcd ${ETCD_OPTS}
+consoleOutput 1 "[100]: Starting /bin/etcd ${ETCD_OPTS}"
+/bin/etcd ${ETCD_OPTS}
