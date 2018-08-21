@@ -4,7 +4,7 @@ MAINTAINER Raymond Otto <otto@digiwhite.nl> GIThub: digiwhite1980
 # We dont use variables which start with ETCD_. These are reserved
 # by ETCD
 ##############################################################################
-ENV ED_VERSION=v3.3.2
+ENV ED_VERSION=v3.3.9
 ENV ED_URL="https://github.com/coreos/etcd/releases/download/${ED_VERSION}/etcd-${ED_VERSION}-linux-amd64.tar.gz"
 
 ENV ED_HOME="/etcd"
